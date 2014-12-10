@@ -9,7 +9,11 @@
 #import <UIKit/UIKit.h>
 
 @interface ViewController : UIViewController
+{
+    
+}
 
+@property(nonatomic, assign)int actionType;
 
 @end
 

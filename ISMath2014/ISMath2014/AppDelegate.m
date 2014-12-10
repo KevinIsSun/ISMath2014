@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "MainTableViewController.h"
 
 @interface AppDelegate ()
 
@@ -17,6 +18,11 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    [self toMain];
+    self.window.backgroundColor = [UIColor whiteColor];
+    [self.window makeKeyAndVisible];
+    
     return YES;
 }
 
@@ -124,4 +130,14 @@
     }
 }
 
+- (void)toMain
+{
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    UITabBarController *tab = [[UITabBarController alloc] init];
+    MainTableViewController *controller = [[MainTableViewController alloc] init];
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:controller];
+    [tab addChildViewController:nav];
+    
+    self.window.rootViewController = tab;
+}
 @end
