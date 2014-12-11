@@ -8,6 +8,7 @@
 
 #import "MainTableViewController.h"
 #import "ViewController.h"
+#include "TestViewController.h"
 
 @interface MainTableViewController ()
 
@@ -73,7 +74,7 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    ViewController *controller = [[ViewController alloc] init];
+    TestViewController *controller = [[TestViewController alloc] init];
     switch (indexPath.row) {
         case 0:
             //label.text = @"有限域GF(28)";
