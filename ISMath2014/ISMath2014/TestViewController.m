@@ -34,6 +34,7 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark - 建立页面
 - (void)buildGF28
 {
     mainView = [[UIView alloc] initWithFrame:self.view.bounds];
@@ -42,12 +43,14 @@
     gfArg1.placeholder = @"参数1";
     gfArg1.keyboardType = UIKeyboardTypeNumberPad;
     gfArg1.font = [UIFont fontWithName:@"STHeitiSC-Light" size:20];
+    gfArg1.delegate = self;
     [mainView addSubview:gfArg1];
     
     gfArg2 = [[UITextField alloc] initWithFrame:CGRectMake(20, 140, 150, 40)];
     gfArg2.placeholder = @"参数2";
     gfArg2.keyboardType = UIKeyboardTypeNumberPad;
     gfArg2.font = [UIFont fontWithName:@"STHeitiSC-Light" size:20];
+    gfArg2.delegate = self;
     [mainView addSubview:gfArg2];
     
     add = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -78,6 +81,7 @@
     self.view = mainView;
 }
 
+#pragma mark - gf28四则运算
 - (void)gfAdd
 {
     int arg1 = [gfArg1.text intValue];
@@ -89,5 +93,24 @@
 {
     int arg1 = [gfArg1.text intValue];
     int agr2 = [gfArg2.text intValue];
+}
+
+- (int)getIntAtPlace:(NSString*)string withPlace:(int)place
+{
+    return [[string substringWithRange:NSMakeRange(place, place + 1)] intValue];
+}
+
+#pragma mark - UITextField 代理
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
+{
+    if (range.length != 8) {
+        NSLog(@"请输入正确的字符串长度");
+        return NO;
+    }
+    if ([string isEqualToString:@"1"] || [string isEqualToString:@"0"]) {
+        return YES;
+    }
+    NSLog(@"请输入0或1");
+    return NO;
 }
 @end

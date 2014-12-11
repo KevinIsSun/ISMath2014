@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface TestViewController : UIViewController
+@interface TestViewController : UIViewController<UITextFieldDelegate>
 {
     UIView *mainView;
     UITextField *gfArg1;
