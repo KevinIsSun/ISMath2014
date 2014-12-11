@@ -35,6 +35,9 @@
 }
 
 #pragma mark - 建立页面
+/**
+ *  建立gf28四则运算界面
+ */
 - (void)buildGF28
 {
     mainView = [[UIView alloc] initWithFrame:self.view.bounds];
@@ -82,12 +85,18 @@
 }
 
 #pragma mark - gf28四则运算
+/**
+ *  gf28加法运算
+ */
 - (void)gfAdd
 {
     NSArray *arg1 = [[NSArray alloc] init];
     arg1 = [self getArgArray:gfArg1.text];
 }
 
+/**
+ *  gf28乘法运算
+ */
 - (void)gfMul
 {
     NSArray *arg1 = [[NSArray alloc] init];
