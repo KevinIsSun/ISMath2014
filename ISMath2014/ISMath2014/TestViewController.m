@@ -84,20 +84,44 @@
 #pragma mark - gf28四则运算
 - (void)gfAdd
 {
-    int arg1 = [gfArg1.text intValue];
-    int arg2 = [gfArg2.text intValue];
-    NSLog(@"%d", arg1);
+    NSArray *arg1 = [[NSArray alloc] init];
+    arg1 = [self getArgArray:gfArg1.text];
 }
 
 - (void)gfMul
 {
-    int arg1 = [gfArg1.text intValue];
-    int agr2 = [gfArg2.text intValue];
+    NSArray *arg1 = [[NSArray alloc] init];
+    arg1 = [self getArgArray:gfArg1.text];
 }
 
-- (int)getIntAtPlace:(NSString*)string withPlace:(int)place
+/**
+ *  获取数组形式的参数
+ *  注意数组的顺序
+ *
+ *  @param string 参数字符串
+ *
+ *  @return 参数数组
+ */
+- (NSArray *)getArgArray:(NSString *)string
 {
-    return [[string substringWithRange:NSMakeRange(place, place + 1)] intValue];
+    NSMutableArray *array = [[NSMutableArray alloc] init];
+    for (int i = 7; i > -1; i--) {
+        [array addObject:[self getIntAtPlace:string withPlace:i]];
+    }
+    return array;
+}
+
+/**
+ *  获取字符串指定位置的数字
+ *
+ *  @param string 字符串
+ *  @param place  位置
+ *
+ *  @return 返回的数字
+ */
+- (NSNumber *)getIntAtPlace:(NSString*)string withPlace:(int)place
+{
+    return [NSNumber numberWithInt:[[string substringWithRange:NSMakeRange(place, place)] intValue]];
 }
 
 #pragma mark - UITextField 代理
