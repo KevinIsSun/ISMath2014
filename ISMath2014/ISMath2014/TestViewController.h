@@ -16,6 +16,8 @@
     
     UIButton *add;
     UIButton *mul;
+    
+    UILabel *lbresult;
 }
 
 @property(nonatomic, assign)int actionType;

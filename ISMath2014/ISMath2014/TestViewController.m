@@ -92,7 +92,42 @@
 {
     NSArray *arg1 = [[NSArray alloc] init];
     arg1 = [self getArgArray:gfArg1.text];
-    NSLog(@"%@", arg1);
+    NSArray *arg2 = [[NSArray alloc] init];
+    arg2 = [self getArgArray:gfArg2.text];
+    
+    NSMutableArray *result = [[NSMutableArray alloc] init];
+    NSUInteger minlength = 0;
+    NSUInteger maxlength = 0;
+    if (arg1.count > arg2.count) {
+        minlength = arg2.count;
+        maxlength = arg1.count;
+        
+        for (int i = 0 ; i < (int)minlength; i++) {
+            NSNumber *temp = [NSNumber numberWithInteger:[arg1 objectAtIndex:i] == [arg2 objectAtIndex:i] ? 0 : 1 ];
+            [result addObject:temp];
+        }
+        
+        for (int i = (int)minlength; i < (int)maxlength; i++) {
+            [result addObject:[arg1 objectAtIndex:i]];
+        }
+            
+    } else {
+        minlength = arg1.count;
+        maxlength = arg2.count;
+        
+        
+        for (int i = 0 ; i < (int)minlength; i++) {
+            NSNumber *temp = [NSNumber numberWithInteger:[arg1 objectAtIndex:i] == [arg2 objectAtIndex:i] ? 0 : 1 ];
+            [result addObject:temp];
+        }
+        
+        for (int i = (int)minlength; i < (int)maxlength; i++) {
+            [result addObject:[arg2 objectAtIndex:i]];
+        }
+    }
+    
+    NSLog(@"%@", result);
+    [self createResultLable:result];
 }
 
 /**
@@ -105,6 +140,35 @@
     
 }
 
+/**
+ *  显示结果
+ *
+ *  @param array 结果数组
+ */
+- (void)createResultLable:(NSArray*)array
+{
+    NSString *resultStr = @"result: ";
+    for (int i = 0; i < array.count; i++) {
+        if ([array objectAtIndex:i] != 0) {
+            if (i != array.count - 1) {
+                if (i == 0) {
+                    resultStr = [resultStr stringByAppendingFormat:@"1 + "];
+                } else {
+                    resultStr = [resultStr stringByAppendingFormat:@"x^%d + ", i];
+                }
+            } else {
+                resultStr = [resultStr stringByAppendingFormat:@"x^%d", i];
+            }
+        }
+    }
+    NSLog(@"%@", resultStr);
+    
+    lbresult = [[UILabel alloc] initWithFrame:CGRectMake(20, 300, 300, 50)];
+    lbresult.text = resultStr;
+    [lbresult setTextColor:[UIColor blackColor]];
+    
+    [self.view addSubview:lbresult];
+}
 /**
  *  获取数组形式的参数
  *  注意数组的顺序
@@ -138,7 +202,7 @@
 #pragma mark - UITextField 代理
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
 {
-    if (range.location > 9) {
+    if (range.location > 7) {
         NSLog(@"不能超过8位");
         return NO;
     }
