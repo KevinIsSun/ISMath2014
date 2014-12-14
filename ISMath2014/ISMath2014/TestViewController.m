@@ -92,6 +92,7 @@
 {
     NSArray *arg1 = [[NSArray alloc] init];
     arg1 = [self getArgArray:gfArg1.text];
+    NSLog(@"%@", arg1);
 }
 
 /**
@@ -101,6 +102,7 @@
 {
     NSArray *arg1 = [[NSArray alloc] init];
     arg1 = [self getArgArray:gfArg1.text];
+    
 }
 
 /**
@@ -114,7 +116,7 @@
 - (NSArray *)getArgArray:(NSString *)string
 {
     NSMutableArray *array = [[NSMutableArray alloc] init];
-    for (int i = 7; i > -1; i--) {
+    for (int i = (int)string.length - 1; i > -1; i--) {
         [array addObject:[self getIntAtPlace:string withPlace:i]];
     }
     return array;
@@ -130,14 +132,14 @@
  */
 - (NSNumber *)getIntAtPlace:(NSString*)string withPlace:(int)place
 {
-    return [NSNumber numberWithInt:[[string substringWithRange:NSMakeRange(place, place)] intValue]];
+    return [NSNumber numberWithInt:[[string substringWithRange:NSMakeRange(place, 1)] intValue]];
 }
 
 #pragma mark - UITextField 代理
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
 {
-    if (range.length != 8) {
-        NSLog(@"请输入正确的字符串长度");
+    if (range.location > 9) {
+        NSLog(@"不能超过8位");
         return NO;
     }
     if ([string isEqualToString:@"1"] || [string isEqualToString:@"0"]) {
