@@ -7,6 +7,7 @@
 //
 
 #import "TestViewController.h"
+#import "math.h"
 
 @interface TestViewController ()
 
@@ -25,6 +26,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    
+    [self initTables];
+    
     self.title = @"gf28";
     [self buildGF28];
 }
@@ -84,6 +88,39 @@
     self.view = mainView;
 }
 
+#pragma mark - init action
+/**
+ *  初始化正表反表逆元表
+ */
+- (void)initTables
+{
+    int i;
+    
+    table[0] = 1;//g^0
+    for(i = 1; i < 255; ++i)//生成元为x + 1
+    {
+        //下面是m_table[i] = m_table[i-1] * (x + 1)的简写形式
+        table[i] = (table[i-1] << 1 ) ^ table[i-1];
+        
+        //最高指数已经到了8，需要模上m(x)
+        if( table[i] & 0x100 )
+        {
+            table[i] ^= 0x11B;//用到了前面说到的乘法技巧
+        }  
+    }
+    
+    for(i = 0; i < 255; ++i)
+        arc_table[ table[i] ] = i;
+    
+    for(i = 1; i < 256; ++i)//0没有逆元，所以从1开始
+    {
+        int k = arc_table[i];
+        k = 255 - k;
+        k %= 255;//m_table的取值范围为 [0, 254]
+        inverse_table[i] = table[k];
+    }
+}
+
 #pragma mark - gf28四则运算
 /**
  *  gf28加法运算
@@ -126,7 +163,6 @@
         }
     }
     
-    NSLog(@"%@", result);
     [self createResultLable:result];
 }
 
@@ -137,7 +173,52 @@
 {
     NSArray *arg1 = [[NSArray alloc] init];
     arg1 = [self getArgArray:gfArg1.text];
+    NSArray *arg2 = [[NSArray alloc] init];
+    arg2 = [self getArgArray:gfArg2.text];
     
+    int arg1Int, arg2Int = 0;
+    for (int i = 0; i < arg1.count; i++) {
+        arg1Int += [[arg1 objectAtIndex:i] intValue] * pow(2, i);
+    }
+    
+    for (int i = 0 ; i < arg2.count; i++) {
+        arg2Int += [[arg2 objectAtIndex:i] intValue] * pow(2, i);
+    }
+    
+    int resultInt = table[ (arc_table[arg1Int] + arc_table[arg2Int]) % 255];
+    
+    [self createResultLableByInt:resultInt];
+}
+
+- (void)createResultLableByInt:(int)arg
+{
+    NSLog(@"%d", arg);
+    NSString *resultStr = @"result:";
+    
+    int maxMi = 0;
+    for (int i = 0; i < 8; i++) {
+        if (pow(2, i) > arg) {
+            maxMi = i - 1;
+            break;
+        }
+    }
+    BOOL flag = YES;
+    while (arg / 2 > 1 || flag) {
+        double num = fmod(arg, 2);
+        if (num != 0) {
+            resultStr = [resultStr stringByAppendingFormat:@"x^%d + ", maxMi];
+        }
+        arg = arg / 2;
+        if (arg / 2 < 1) {
+            flag = NO;
+        }
+        maxMi--;
+    }
+    lbresult = [[UILabel alloc] initWithFrame:CGRectMake(20, 300, 360, 80)];
+    lbresult.text = resultStr;
+    [lbresult setTextColor:[UIColor blackColor]];
+    
+    [self.view addSubview:lbresult];
 }
 
 /**
@@ -147,7 +228,7 @@
  */
 - (void)createResultLable:(NSArray*)array
 {
-    NSString *resultStr = @"result: ";
+    NSString *resultStr = @"result:/n";
     for (int i = 0; i < array.count; i++) {
         if ([array objectAtIndex:i] != 0) {
             if (i != array.count - 1) {
@@ -161,9 +242,8 @@
             }
         }
     }
-    NSLog(@"%@", resultStr);
     
-    lbresult = [[UILabel alloc] initWithFrame:CGRectMake(20, 300, 300, 50)];
+    lbresult = [[UILabel alloc] initWithFrame:CGRectMake(20, 300, 360, 80)];
     lbresult.text = resultStr;
     [lbresult setTextColor:[UIColor blackColor]];
     

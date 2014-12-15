@@ -14,6 +14,10 @@
     UITextField *gfArg1;
     UITextField *gfArg2;
     
+    int table[256];
+    int arc_table[256];
+    int inverse_table[256];
+    
     UIButton *add;
     UIButton *mul;
     
