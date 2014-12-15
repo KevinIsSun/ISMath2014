@@ -192,28 +192,23 @@
 
 - (void)createResultLableByInt:(int)arg
 {
-    NSLog(@"%d", arg);
+    
     NSString *resultStr = @"result:";
     
-    int maxMi = 0;
-    for (int i = 0; i < 8; i++) {
-        if (pow(2, i) > arg) {
-            maxMi = i - 1;
-            break;
+    for (int i = 7; i > -1; i--) {
+        if (pow(2, i) <= arg) {
+            if (i != 0) {
+                resultStr = [resultStr stringByAppendingFormat:@"x^%d + ", i];
+            } else {
+                resultStr = [resultStr stringByAppendingString:@"1 + "];
+            }
+            
+            arg = arg - pow(2, i);
         }
     }
-    BOOL flag = YES;
-    while (arg / 2 > 1 || flag) {
-        double num = fmod(arg, 2);
-        if (num != 0) {
-            resultStr = [resultStr stringByAppendingFormat:@"x^%d + ", maxMi];
-        }
-        arg = arg / 2;
-        if (arg / 2 < 1) {
-            flag = NO;
-        }
-        maxMi--;
-    }
+    
+    resultStr = [resultStr substringToIndex:resultStr.length - 2];
+    
     lbresult = [[UILabel alloc] initWithFrame:CGRectMake(20, 300, 360, 80)];
     lbresult.text = resultStr;
     [lbresult setTextColor:[UIColor blackColor]];
