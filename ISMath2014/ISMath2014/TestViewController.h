@@ -20,6 +20,7 @@
     
     UIButton *add;
     UIButton *mul;
+    UIButton *startCount;
     
     UILabel *lbresult;
 }
