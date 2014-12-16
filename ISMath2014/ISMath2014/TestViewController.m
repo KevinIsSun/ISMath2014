@@ -217,8 +217,8 @@
         }
     }
     
-    int reslut[65536] = {0};
-    reslut[0] = -1;
+    int result[65536] = {0};
+    result[0] = -1;
     
     for (int i = 1; i < 65536; i++) {
         for (int j = 0; j < 256; j++) {
@@ -230,14 +230,14 @@
                     temp = temp ^ origin[j][k] ^ sbox[j][k] ^ func[i][k] ^ func[i][k + 8];
                 }
             }
-            reslut[i] += temp;
+            result[i] += temp;
         }
     }
     
 //    bubble(reslut, 65535);
     
     for (int i = 0; i < 8; i++) {
-        NSLog(@"%d", origin[200][i]);
+        NSLog(@"%d", result[i]);
     }
 }
 
