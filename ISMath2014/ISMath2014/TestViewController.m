@@ -158,6 +158,9 @@
     }
 }
 
+/**
+ *  线性分析
+ */
 - (void)calculateSbox
 {
     // 初始化SBOX
@@ -258,6 +261,13 @@
     }
 }
 
+/**
+ *  冒泡排序
+ *
+ *  @param a      <#a description#>
+ *  @param n      <#n description#>
+ *  @param record <#record description#>
+ */
 void bubble(float *a,int n, int *record) /*定义两个参数：数组首地址与数组大小*/
 {
     int i,j;
