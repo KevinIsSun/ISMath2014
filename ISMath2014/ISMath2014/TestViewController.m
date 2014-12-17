@@ -223,33 +223,53 @@
     for (int i = 1; i < 65536; i++) {
         for (int j = 0; j < 256; j++) {
             int temp = 0;
-            for (int k = 0; k < 8; k++) {
-                if (k == 0) {
-                    temp = origin[j][k] ^ sbox[j][k] ^ func[i][k] ^ func[i][k + 8];
-                } else {
-                    temp = temp ^ origin[j][k] ^ sbox[j][k] ^ func[i][k] ^ func[i][k + 8];
+            BOOL firstFlag = NO;
+            for (int k = 0; k < 16; k++) {
+                if (func[i][k] == 1) {
+                    if (firstFlag == NO) {
+                        temp = origin[j][k];
+                        firstFlag = YES;
+                    } else {
+                        if (k > 7) {
+                            temp = temp ^ sbox[j][k - 8];
+                        } else {
+                            temp = temp ^ origin[j][k];
+                        }
+                    }
                 }
             }
             result[i] += temp;
         }
     }
     
-//    bubble(reslut, 65535);
+    float bias[65536] = {0.0f};
+    int record[65536] = {0};
     
-    for (int i = 0; i < 8; i++) {
-        NSLog(@"%d", result[i]);
+    for (int i = 1; i < 65536; i++) {
+        bias[i] = fabs((float)result[i] / 256 - 0.5);
+        record[i] = i;
+    }
+    
+    bubble(&bias[1], 65535, &record[1]);
+
+    for (int i = 0; i < 10; i++) {
+        NSLog(@"%f", bias[65535-i]);
+        NSLog(@"%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d", func[record[65535-i]][0], func[record[65535-i]][1],func[record[65535-i]][2],func[record[65535-i]][3],func[record[65535-i]][4],func[record[65535-i]][5],func[record[65535-i]][6],func[record[65535-i]][7],func[record[65535-i]][8],func[record[65535-i]][9],func[record[65535-i]][10],func[record[65535-i]][11],func[record[65535-i]][12],func[record[65535-i]][13],func[record[65535-i]][14],func[record[65535-i]][15]);
     }
 }
 
-void bubble(int *a,int n) /*定义两个参数：数组首地址与数组大小*/
+void bubble(float *a,int n, int *record) /*定义两个参数：数组首地址与数组大小*/
 {
-    int i,j,temp;
+    int i,j;
+    float temp;
     for(i=0;i<n-1;i++)
         for(j=i+1;j<n;j++) /*注意循环的上下限*/
             if(a[i]>a[j]) {
                 temp=a[i];
                 a[i]=a[j];
                 a[j]=temp;
+                record[i] = j;
+                record[j] = i;
             }
 }
 
