@@ -163,6 +163,8 @@
  */
 - (void)calculateSbox
 {
+    
+    clock_t clockStart = clock();
     // 初始化SBOX
     unsigned char s[256] =
     {
@@ -186,7 +188,7 @@
     
     int origin[256][8] = {0};
     int sbox[256][8] = {0};
-    int func[65535][16] = {0};
+    int func[65536][16] = {0};
     
     for (int i = 0; i < 256; i++) {
         int temp = i;
@@ -227,21 +229,31 @@
         for (int j = 0; j < 256; j++) {
             int temp = 0;
             BOOL firstFlag = NO;
+            BOOL secondFlag = NO;
             for (int k = 0; k < 16; k++) {
                 if (func[i][k] == 1) {
                     if (firstFlag == NO) {
-                        temp = origin[j][k];
-                        firstFlag = YES;
+                        if (k < 8) {
+                            temp = origin[j][k];
+                            firstFlag = YES;
+                        }
                     } else {
                         if (k > 7) {
+                            secondFlag = YES;
                             temp = temp ^ sbox[j][k - 8];
-                        } else {
+                        } else if (k < 8){
                             temp = temp ^ origin[j][k];
                         }
                     }
                 }
             }
-            result[i] += temp;
+            if (secondFlag == YES && firstFlag == YES) {
+                result[i] += temp;
+            }
+            else {
+                result[i] = 128;
+            }
+            
         }
     }
     
@@ -249,16 +261,19 @@
     int record[65536] = {0};
     
     for (int i = 1; i < 65536; i++) {
-        bias[i] = fabs((float)result[i] / 256 - 0.5);
+//        bias[i] = fabs((float)result[i] / 256 - 0.5);
+        bias[i] = (float)result[i] / 256;
         record[i] = i;
     }
     
     bubble(&bias[1], 65535, &record[1]);
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 300; i++) {
         NSLog(@"%f", bias[65535-i]);
         NSLog(@"%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d", func[record[65535-i]][0], func[record[65535-i]][1],func[record[65535-i]][2],func[record[65535-i]][3],func[record[65535-i]][4],func[record[65535-i]][5],func[record[65535-i]][6],func[record[65535-i]][7],func[record[65535-i]][8],func[record[65535-i]][9],func[record[65535-i]][10],func[record[65535-i]][11],func[record[65535-i]][12],func[record[65535-i]][13],func[record[65535-i]][14],func[record[65535-i]][15]);
     }
+    clock_t clockEnd = clock();
+    NSLog(@"time is %f", (clockEnd - clockStart)/(double)CLOCKS_PER_SEC);
 }
 
 /**
@@ -272,14 +287,16 @@ void bubble(float *a,int n, int *record) /*定义两个参数：数组首地址�
 {
     int i,j;
     float temp;
+    float recordTemp;
     for(i=0;i<n-1;i++)
         for(j=i+1;j<n;j++) /*注意循环的上下限*/
             if(a[i]>a[j]) {
                 temp=a[i];
                 a[i]=a[j];
                 a[j]=temp;
-                record[i] = j;
-                record[j] = i;
+                recordTemp = record[i];
+                record[i] = record[j];
+                record[j] = recordTemp;
             }
 }
 
@@ -293,7 +310,7 @@ void bubble(float *a,int n, int *record) /*定义两个参数：数组首地址�
     clock_t clockStart = clock();
     NSLog(@"mark start");
     for (int i = 0; i < 100000; i++) {
-        int ran = random() % 255;
+        int ran = random() % 254 + 1;
         mulResult =  table[ (arc_table[ran] + arc_table[ran]) % 255];
         inverseResult = inverse_table[ran];
     }
