@@ -491,7 +491,18 @@ void shift1(int a[])
         }
     }
     
-    [self createResultLable:result];
+    NSLog(@"%@", result);
+    int resultInt = 0;
+    NSNumber *forTest = [NSNumber numberWithInt:1];
+    for (int i = 0; i < result.count; i++) {
+        if ([result objectAtIndex:i] == forTest) {
+            NSLog(@"nimabi");
+            resultInt += pow(2, i);
+        }
+    }
+    
+    NSLog(@"%d", resultInt);
+    [self createResultLableByInt:resultInt];
 }
 
 /**
@@ -538,8 +549,10 @@ void shift1(int a[])
     
     NSString *resultStr = @"result:";
     
+    BOOL zeroFlag = NO;
     for (int i = 7; i > -1; i--) {
         if (pow(2, i) <= arg) {
+            zeroFlag = YES;
             if (i != 0) {
                 resultStr = [resultStr stringByAppendingFormat:@"x^%d + ", i];
             } else {
@@ -550,7 +563,11 @@ void shift1(int a[])
         }
     }
     
-    resultStr = [resultStr substringToIndex:resultStr.length - 2];
+    if (zeroFlag == YES) {
+        resultStr = [resultStr substringToIndex:resultStr.length - 2];
+    } else {
+        resultStr = [resultStr stringByAppendingString:@"0"];
+    }
     
     lbresult = [[UILabel alloc] initWithFrame:CGRectMake(20, 300, 360, 80)];
     lbresult.text = resultStr;
@@ -566,7 +583,7 @@ void shift1(int a[])
  */
 - (void)createResultLable:(NSArray*)array
 {
-    NSString *resultStr = @"result:/n";
+    NSString *resultStr = @"result:";
     for (int i = 0; i < array.count; i++) {
         if ([array objectAtIndex:i] != 0) {
             if (i != array.count - 1) {
