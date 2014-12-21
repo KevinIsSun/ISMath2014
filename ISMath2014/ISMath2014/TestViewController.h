@@ -20,6 +20,8 @@
     
     UIButton *add;
     UIButton *mul;
+    UIButton *inverse;
+    UIButton *startCountNormal;
     UIButton *startCount;
     
     UILabel *lbresult;

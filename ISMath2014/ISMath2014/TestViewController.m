@@ -11,6 +11,8 @@
 #import "stdlib.h"
 #import "time.h"
 
+static int state=0; // 用于记录左移的位数
+
 @interface TestViewController ()
 
 @end
@@ -97,8 +99,20 @@
     mul.layer.cornerRadius = 8.0f;
     [mainView addSubview:mul];
     
+    inverse = [UIButton buttonWithType:UIButtonTypeCustom];
+    [inverse setFrame:CGRectMake(200, 200, 100, 40)];
+    [inverse setTitle:@"inverse" forState:UIControlStateNormal];
+    [inverse setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    inverse.titleLabel.font = [UIFont fontWithName:@"STHeitiSC-Light" size:20];
+    // 设置按钮边框
+    inverse.layer.borderColor = [[UIColor blackColor] CGColor];
+    inverse.layer.borderWidth = 1.0f;
+    inverse.layer.cornerRadius = 8.0f;
+    [mainView addSubview:inverse];
+    
     [add addTarget:self action:@selector(gfAdd) forControlEvents:UIControlEventTouchUpInside];
     [mul addTarget:self action:@selector(gfMul) forControlEvents:UIControlEventTouchUpInside];
+    [inverse addTarget:self action:@selector(gfInverse) forControlEvents:UIControlEventTouchUpInside];
     
     self.view = mainView;
 }
@@ -112,7 +126,7 @@
     
     startCount = [UIButton buttonWithType:UIButtonTypeCustom];
     [startCount setFrame:CGRectMake(20, 200, 100, 40)];
-    [startCount setTitle:@"开始计算" forState:UIControlStateNormal];
+    [startCount setTitle:@"查表计算" forState:UIControlStateNormal];
     [startCount setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     startCount.titleLabel.font = [UIFont fontWithName:@"STHeitiSC-Light" size:20];
     // 设置按钮边框
@@ -121,7 +135,19 @@
     startCount.layer.cornerRadius = 8.0f;
     [mainView addSubview:startCount];
     
+    startCountNormal = [UIButton buttonWithType:UIButtonTypeCustom];
+    [startCountNormal setFrame:CGRectMake(20, 120, 100, 40)];
+    [startCountNormal setTitle:@"正常计算" forState:UIControlStateNormal];
+    [startCountNormal setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    startCountNormal.titleLabel.font = [UIFont fontWithName:@"STHeitiSC-Light" size:20];
+    // 设置按钮边框
+    startCountNormal.layer.borderColor = [[UIColor blackColor] CGColor];
+    startCountNormal.layer.borderWidth = 1.0f;
+    startCountNormal.layer.cornerRadius = 8.0f;
+    [mainView addSubview:startCountNormal];
+    
     [startCount addTarget:self action:@selector(startCount) forControlEvents:UIControlEventTouchUpInside];
+    [startCountNormal addTarget:self action:@selector(startCountNormal) forControlEvents:UIControlEventTouchUpInside];
     
     self.view = mainView;
 }
@@ -318,7 +344,7 @@ void bubble(float *a,int n, int *record) /*定义两个参数：数组首地址�
     NSLog(@"%f", (clockEnd - clockStart)/(double)CLOCKS_PER_SEC);
     
     NSString *resultStr = @"";
-    resultStr = [resultStr stringByAppendingFormat:@"result: %f s", (clockEnd - clockStart)/(double)CLOCKS_PER_SEC];
+    resultStr = [resultStr stringByAppendingFormat:@"check result: %f s", (clockEnd - clockStart)/(double)CLOCKS_PER_SEC];
     lbresult = [[UILabel alloc] initWithFrame:CGRectMake(20, 300, 360, 80)];
     lbresult.text = resultStr;
     [lbresult setTextColor:[UIColor blackColor]];
@@ -326,6 +352,103 @@ void bubble(float *a,int n, int *record) /*定义两个参数：数组首地址�
     [self.view addSubview:lbresult];
 }
 
+- (void)startCountNormal
+{
+    clock_t clockStart = clock();
+    NSLog(@"mark start");
+    int inverseResult = 0;
+    for (int i = 0; i < 100000; i++) {
+        int a[8], b[8] = {0,1,0,1,0,1,0,1};
+        int c[8] = {0};
+        
+        //  -- 执行乘法运算 --
+        for(int j=7; j>=0; j--)
+        {
+            if(b[j]==1)
+            {
+                xor(c, leftshift(a, 7-j)); // 求和
+            }
+        }
+        
+        int ran = random() % 255;
+        [self initTables];
+        inverseResult = inverse_table[ran];
+    }
+    
+    clock_t clockEnd = clock();
+    NSLog(@"%f", (clockEnd - clockStart)/(double)CLOCKS_PER_SEC);
+    
+    NSString *resultStr = @"";
+    resultStr = [resultStr stringByAppendingFormat:@"normal result: %f s", (clockEnd - clockStart)/(double)CLOCKS_PER_SEC];
+    lbresult = [[UILabel alloc] initWithFrame:CGRectMake(20, 300, 360, 80)];
+    lbresult.text = resultStr;
+    [lbresult setTextColor:[UIColor blackColor]];
+    
+    [self.view addSubview:lbresult];
+}
+
+/* 对a和b进行异或求和运算 */
+void xor(int a[], int b[])
+{
+    for(int i=0; i<8; i++)
+    {
+        a[i]=bitxor(a[i], b[i]);
+    }
+}
+
+/* 按位进行异或求和运算 */
+int bitxor(int a, int b)
+{
+    if(a==b)
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
+}
+
+/*
+ * 计算a[]乘上2的len次幂的结果, len为左移的位数
+ * 参数temp[]用于保存移位后的数组，用于迭代进行下一次移位
+ * 参数len为左移的位数，例如10000000的左移位数为7
+ * state用于保存temp对应的左移位数
+ * 返回结果为移位后的数组
+ */
+int *leftshift(int temp[], int len)
+{
+    if(len==0)
+    {
+        state=0;
+        return temp;
+    }
+    
+    // 由于temp保存了之前的位移结果，所以只需要左移len-state位
+    for(state; state<len; state++)
+    {
+        shift1(temp); // 乘2，或者说左移1位（包含溢出处理）
+    }
+    
+    return temp;
+}
+
+/* 乘2，左移1位，如果溢出则异或1BH */
+void shift1(int a[])
+{
+    int temp=a[0];
+    for(int i=0; i<7; i++)
+    {
+        a[i]=a[i+1];
+    }
+    a[7]=0;
+    
+    if(temp==1) // 溢出处理
+    {
+        int mod[8]={0, 0, 0, 1, 1, 0, 1, 1};
+        xor(a, mod);
+    }
+}
 #pragma mark - gf28四则运算
 /**
  *  gf28加法运算
@@ -391,6 +514,21 @@ void bubble(float *a,int n, int *record) /*定义两个参数：数组首地址�
     }
     
     int resultInt = table[ (arc_table[arg1Int] + arc_table[arg2Int]) % 255];
+    
+    [self createResultLableByInt:resultInt];
+}
+
+- (void)gfInverse
+{
+    NSArray *arg1 = [[NSArray alloc] init];
+    arg1 = [self getArgArray:gfArg1.text];
+    
+    int arg1Int;
+    for (int i = 0; i < arg1.count; i++) {
+        arg1Int += [[arg1 objectAtIndex:i] intValue] * pow(2, i);
+    }
+    
+    int resultInt = inverse_table[arg1Int];
     
     [self createResultLableByInt:resultInt];
 }
