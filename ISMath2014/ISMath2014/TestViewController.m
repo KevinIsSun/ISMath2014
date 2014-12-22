@@ -257,7 +257,7 @@ int Hamming_weight(int n)
     bubble(&bias[1], 65535, &record[1]);
     
     for (int i = 0; i <10; i++) {
-        NSLog(@"%f     %d", bias[65535-i],record[65535-i]);
+        NSLog(@"%f     %d", fabs(bias[65535-i] - 0.5),record[65535-i]);
     }
 
     clock_t clockEnd = clock();
