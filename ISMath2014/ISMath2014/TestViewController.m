@@ -184,6 +184,17 @@ static int state=0; // 用于记录左移的位数
     }
 }
 
+int Hamming_weight(int n)
+{
+    int count=0;
+    while(n != 0){
+        if(n%2 ==1)
+            count++;
+        n /= 2;
+    }
+    return count;
+}
+
 /**
  *  线性分析
  */
@@ -211,95 +222,46 @@ static int state=0; // 用于记录左移的位数
         0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF,
         0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16
     };
+    int result[65536]={0};
     
-    int origin[256][8] = {0};
-    int sbox[256][8] = {0};
-    int func[65536][16] = {0};
-    
-    for (int i = 0; i < 256; i++) {
-        int temp = i;
-        for (int j = 7; j > -1; j--) {
-            if (pow(2, j) <= temp) {
-                origin[i][j] = 1;
-                
-                temp = temp - pow(2, j);
+    for(int i=0;i<65536;i++)
+    {
+        if (i<256 ||i%256==0)
+            continue;
+        else
+        {
+            int right=i&0xFF;
+            int left=(i&0xFF00)>>8;
+            for(int j=0;j<256;j++)
+            {
+                int input=j;
+                int output=s[j];
+                int context1=right&output;
+                int context2=left&input;
+                result[i]+=((Hamming_weight(context1)+Hamming_weight(context2))%2);
             }
         }
     }
     
-    for (int i = 0; i < 256; i++) {
-        for (int j = 7; j > -1; j--) {
-            if (pow(2, j) <= s[i]) {
-                sbox[i][j] = 1;
-                
-                s[i] = s[i] - pow(2, j);
-            }
-         }
-    }
-
-    for (int i = 0; i < 65536; i++) {
-        int temp = i;
-        for (int j = 15; j > -1; j--) {
-            if (pow(2, j) <= temp) {
-                func[i][j] = 1;
-                
-                temp = temp - pow(2, j);
-            }
-        }
-    }
-    
-    int result[65536] = {0};
-    result[0] = -1;
-    
-    for (int i = 1; i < 65536; i++) {
-        for (int j = 0; j < 256; j++) {
-            int temp = 0;
-            BOOL firstFlag = NO;
-            BOOL secondFlag = NO;
-            for (int k = 0; k < 16; k++) {
-                if (func[i][k] == 1) {
-                    if (firstFlag == NO) {
-                        if (k < 8) {
-                            temp = origin[j][k];
-                            firstFlag = YES;
-                        }
-                    } else {
-                        if (k > 7) {
-                            secondFlag = YES;
-                            temp = temp ^ sbox[j][k - 8];
-                        } else if (k < 8){
-                            temp = temp ^ origin[j][k];
-                        }
-                    }
-                }
-            }
-            if (secondFlag == YES && firstFlag == YES) {
-                result[i] += temp;
-            }
-            else {
-                result[i] = 128;
-            }
-            
-        }
-    }
-    
-    float bias[65536] = {0.0f};
+    double bias[65536] = {0.0f};
     int record[65536] = {0};
     
     for (int i = 1; i < 65536; i++) {
-//        bias[i] = fabs((float)result[i] / 256 - 0.5);
-        bias[i] = (float)result[i] / 256;
-        record[i] = i;
+        record[i]=i;
+        if(i>=256 && i%256!=0)
+        {
+            bias[i] = (double)result[i]/256;
+        }
     }
     
     bubble(&bias[1], 65535, &record[1]);
-
-    for (int i = 0; i < 10; i++) {
-        NSLog(@"%f", bias[65535-i]);
-        NSLog(@"%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d", func[record[65535-i]][0], func[record[65535-i]][1],func[record[65535-i]][2],func[record[65535-i]][3],func[record[65535-i]][4],func[record[65535-i]][5],func[record[65535-i]][6],func[record[65535-i]][7],func[record[65535-i]][8],func[record[65535-i]][9],func[record[65535-i]][10],func[record[65535-i]][11],func[record[65535-i]][12],func[record[65535-i]][13],func[record[65535-i]][14],func[record[65535-i]][15]);
+    
+    for (int i = 0; i <10; i++) {
+        NSLog(@"%f     %d", bias[65535-i],record[65535-i]);
     }
+
     clock_t clockEnd = clock();
-    NSLog(@"time is %f", (clockEnd - clockStart)/(double)CLOCKS_PER_SEC);
+    NSLog(@"%f", (clockEnd - clockStart)/(double)CLOCKS_PER_SEC);
 }
 
 /**
@@ -309,20 +271,20 @@ static int state=0; // 用于记录左移的位数
  *  @param n      <#n description#>
  *  @param record <#record description#>
  */
-void bubble(float *a,int n, int *record) /*定义两个参数：数组首地址与数组大小*/
+void bubble(double *a,int n, int *record) /*定义两个参数：数组首地址与数组大小*/
 {
     int i,j;
     float temp;
-    float recordTemp;
+    int las;
     for(i=0;i<n-1;i++)
         for(j=i+1;j<n;j++) /*注意循环的上下限*/
             if(a[i]>a[j]) {
                 temp=a[i];
                 a[i]=a[j];
                 a[j]=temp;
-                recordTemp = record[i];
-                record[i] = record[j];
-                record[j] = recordTemp;
+                las= record[j];
+                record[j] = record[i];
+                record[i]=las;
             }
 }
 
@@ -460,6 +422,8 @@ void shift1(int a[])
     NSArray *arg2 = [[NSArray alloc] init];
     arg2 = [self getArgArray:gfArg2.text];
     
+    int resultInt = 0;
+    
     NSMutableArray *result = [[NSMutableArray alloc] init];
     NSUInteger minlength = 0;
     NSUInteger maxlength = 0;
@@ -492,10 +456,8 @@ void shift1(int a[])
     }
     
     NSLog(@"%@", result);
-    int resultInt = 0;
-    NSNumber *forTest = [NSNumber numberWithInt:1];
     for (int i = 0; i < result.count; i++) {
-        if ([result objectAtIndex:i] == forTest) {
+        if ([[result objectAtIndex:i] intValue] == 1) {
             NSLog(@"nimabi");
             resultInt += pow(2, i);
         }
@@ -524,9 +486,13 @@ void shift1(int a[])
         arg2Int += [[arg2 objectAtIndex:i] intValue] * pow(2, i);
     }
     
-    int resultInt = table[ (arc_table[arg1Int] + arc_table[arg2Int]) % 255];
-    
-    [self createResultLableByInt:resultInt];
+    if (arg1Int == 0 || arg2Int == 0) {
+        [self createResultLableByInt:0];
+    } else {
+        int resultInt = table[ (arc_table[arg1Int] + arc_table[arg2Int]) % 255];
+        
+        [self createResultLableByInt:resultInt];
+    }
 }
 
 - (void)gfInverse
@@ -546,7 +512,7 @@ void shift1(int a[])
 
 - (void)createResultLableByInt:(int)arg
 {
-    
+    [lbresult removeFromSuperview];
     NSString *resultStr = @"result:";
     
     BOOL zeroFlag = NO;
