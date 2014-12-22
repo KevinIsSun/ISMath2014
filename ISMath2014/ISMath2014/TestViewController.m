@@ -294,7 +294,7 @@ static int state=0; // 用于记录左移的位数
     
     bubble(&bias[1], 65535, &record[1]);
 
-    for (int i = 0; i < 300; i++) {
+    for (int i = 0; i < 10; i++) {
         NSLog(@"%f", bias[65535-i]);
         NSLog(@"%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d", func[record[65535-i]][0], func[record[65535-i]][1],func[record[65535-i]][2],func[record[65535-i]][3],func[record[65535-i]][4],func[record[65535-i]][5],func[record[65535-i]][6],func[record[65535-i]][7],func[record[65535-i]][8],func[record[65535-i]][9],func[record[65535-i]][10],func[record[65535-i]][11],func[record[65535-i]][12],func[record[65535-i]][13],func[record[65535-i]][14],func[record[65535-i]][15]);
     }
